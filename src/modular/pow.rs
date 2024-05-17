@@ -11,7 +11,7 @@ const WINDOW_MASK: Word = (1 << WINDOW) - 1;
 /// `exponent_bits` represents the number of bits to take into account for the exponent.
 ///
 /// NOTE: this value is leaked in the time pattern.
-pub const fn pow_montgomery_form<const LIMBS: usize, const RHS_LIMBS: usize>(
+pub fn pow_montgomery_form<const LIMBS: usize, const RHS_LIMBS: usize>(
     x: &Uint<LIMBS>,
     exponent: &Uint<RHS_LIMBS>,
     exponent_bits: u32,
@@ -28,7 +28,7 @@ pub const fn pow_montgomery_form<const LIMBS: usize, const RHS_LIMBS: usize>(
     )
 }
 
-pub const fn multi_exponentiate_montgomery_form_array<
+pub fn multi_exponentiate_montgomery_form_array<
     const LIMBS: usize,
     const RHS_LIMBS: usize,
     const N: usize,
@@ -39,8 +39,19 @@ pub const fn multi_exponentiate_montgomery_form_array<
     one: &Uint<LIMBS>,
     mod_neg_inv: Limb,
 ) -> Uint<LIMBS> {
+    #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+    let one_ = if LIMBS == succinct::BIGINT_WIDTH_WORDS {
+        Uint::<LIMBS>::ONE
+    } else {
+        *one // 1 in Montgomery form
+    };
+
+    #[cfg(not(all(target_os = "zkvm", target_arch = "riscv32")))]
+    let one_ = *one; // 1 in Montgomery form
+
+    #[cfg(not(all(target_os = "zkvm", target_arch = "riscv32")))]
     if exponent_bits == 0 {
-        return *one; // 1 in Montgomery form
+        return one_; // 1 in Montgomery form
     }
 
     let mut powers_and_exponents =
@@ -76,8 +87,19 @@ pub fn multi_exponentiate_montgomery_form_slice<const LIMBS: usize, const RHS_LI
     one: &Uint<LIMBS>,
     mod_neg_inv: Limb,
 ) -> Uint<LIMBS> {
+    #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+    let one_ = if LIMBS == succinct::BIGINT_WIDTH_WORDS {
+        Uint::<LIMBS>::ONE
+    } else {
+        *one // 1 in Montgomery form
+    };
+
+    #[cfg(not(all(target_os = "zkvm", target_arch = "riscv32")))]
+    let one_ = *one; // 1 in Montgomery form
+
+    #[cfg(not(all(target_os = "zkvm", target_arch = "riscv32")))]
     if exponent_bits == 0 {
-        return *one; // 1 in Montgomery form
+        return one_; // 1 in Montgomery form
     }
 
     let powers_and_exponents: Vec<([Uint<LIMBS>; 1 << WINDOW], Uint<RHS_LIMBS>)> =
@@ -114,7 +136,7 @@ const fn compute_powers<const LIMBS: usize>(
     powers
 }
 
-const fn multi_exponentiate_montgomery_form_internal<const LIMBS: usize, const RHS_LIMBS: usize>(
+fn multi_exponentiate_montgomery_form_internal<const LIMBS: usize, const RHS_LIMBS: usize>(
     powers_and_exponents: &[([Uint<LIMBS>; 1 << WINDOW], Uint<RHS_LIMBS>)],
     exponent_bits: u32,
     modulus: &Odd<Uint<LIMBS>>,

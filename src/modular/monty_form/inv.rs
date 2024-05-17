@@ -8,6 +8,9 @@ use crate::{
 use core::fmt;
 use subtle::CtOption;
 
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+use crate::succinct;
+
 impl<const SAT_LIMBS: usize, const UNSAT_LIMBS: usize> MontyForm<SAT_LIMBS>
 where
     Odd<Uint<SAT_LIMBS>>: PrecomputeInverter<

@@ -52,8 +52,19 @@ fn pow_montgomery_form(
     one: &BoxedUint,
     mod_neg_inv: Limb,
 ) -> BoxedUint {
+    #[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+    let one_ = if LIMBS == succinct::BIGINT_WIDTH_WORDS {
+        Uint::<LIMBS>::ONE
+    } else {
+        *one // 1 in Montgomery form
+    };
+
+    #[cfg(not(all(target_os = "zkvm", target_arch = "riscv32")))]
+    let one_ = *one; // 1 in Montgomery form
+
+    #[cfg(not(all(target_os = "zkvm", target_arch = "riscv32")))]
     if exponent_bits == 0 {
-        return one.clone(); // 1 in Montgomery form
+        return one_; // 1 in Montgomery form
     }
 
     const WINDOW: u32 = 4;
