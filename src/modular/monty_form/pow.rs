@@ -11,10 +11,7 @@ use {crate::modular::pow::multi_exponentiate_montgomery_form_slice, alloc::vec::
 
 impl<const LIMBS: usize> MontyForm<LIMBS> {
     /// Raises to the `exponent` power.
-    pub const fn pow<const RHS_LIMBS: usize>(
-        &self,
-        exponent: &Uint<RHS_LIMBS>,
-    ) -> MontyForm<LIMBS> {
+    pub fn pow<const RHS_LIMBS: usize>(&self, exponent: &Uint<RHS_LIMBS>) -> MontyForm<LIMBS> {
         self.pow_bounded_exp(exponent, Uint::<RHS_LIMBS>::BITS)
     }
 
@@ -23,7 +20,7 @@ impl<const LIMBS: usize> MontyForm<LIMBS> {
     /// to take into account for the exponent.
     ///
     /// NOTE: `exponent_bits` may be leaked in the time pattern.
-    pub const fn pow_bounded_exp<const RHS_LIMBS: usize>(
+    pub fn pow_bounded_exp<const RHS_LIMBS: usize>(
         &self,
         exponent: &Uint<RHS_LIMBS>,
         exponent_bits: u32,

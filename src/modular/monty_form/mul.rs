@@ -9,7 +9,7 @@ use core::ops::{Mul, MulAssign};
 
 impl<const LIMBS: usize> MontyForm<LIMBS> {
     /// Multiplies by `rhs`.
-    pub const fn mul(&self, rhs: &Self) -> Self {
+    pub fn mul(&self, rhs: &Self) -> Self {
         Self {
             montgomery_form: mul_montgomery_form(
                 &self.montgomery_form,
